@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   NotFoundException,
@@ -6,20 +7,21 @@ import {
   Post,
 } from '@nestjs/common';
 import { GamesService } from './games.service';
+import { CreateGameDto } from './dto/create-game.dto';
+import { GameResponseDto } from './dto/game-response.dto';
 
 @Controller('games')
 export class GamesController {
-  constructor(private readonly appService: GamesService) {}
+  constructor(private readonly gamesService: GamesService) {}
 
   @Get()
-  async getAll() {
-    // TODO: Implement get all games logic here
-    return [];
+  async getAll(): Promise<GameResponseDto[]> {
+    return await this.gamesService.getAllGames();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const game = await this.appService.findOneGame(id);
+  async findOne(@Param('id') id: string): Promise<GameResponseDto> {
+    const game = await this.gamesService.findOneGame(id);
 
     if (!game) {
       throw new NotFoundException(`Game with id "${id}" not found`);
@@ -29,8 +31,10 @@ export class GamesController {
   }
 
   @Post()
-  create() {
-    // TODO: Implement game creation logic here
-    throw new Error('Not implemented');
+  async create(@Body() createGameDto: CreateGameDto) {
+    return await this.gamesService.createGame(
+      createGameDto.rows,
+      createGameDto.columns,
+    );
   }
 }
