@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "db:start": "docker compose -f docker-compose.yml up -d",
+    "db:start": "docker compose -f docker-compose.yml up --build -d",
     "db:stop": "docker compose -f docker-compose.yml down",
     "db:reset": "docker rm -f lucra-be-take-home_db && docker volume rm lucra-be-take-home_db_data",
     "start": "nest start",
@@ -43,12 +43,12 @@
     "@nestjs/common": "10.3.10",
     "@nestjs/core": "10.3.10",
     "@nestjs/platform-express": "10.3.10",
-    "@nestjs/typeorm": "10.0.2",
+    "@nestjs/typeorm": "^10.0.2",
     "class-validator": "^0.14.1",
     "pg": "8.12.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.1",
-    "typeorm": "0.3.21-dev.e7649d2"
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
     "@nestjs/cli": "10.4.4",
