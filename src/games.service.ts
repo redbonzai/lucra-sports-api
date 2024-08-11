@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { CellStatus, Game, GameCell, GameStatus } from './entities';
+import { Game, GameCell } from './entities';
 import { GameRepository } from './repositories/game.repository';
 import { GameCellRepository } from './repositories/game-cell.repository';
 
