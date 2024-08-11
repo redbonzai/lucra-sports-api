@@ -17,9 +17,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
+          POSTGRES_USER: local
+          POSTGRES_PASSWORD: local
+          POSTGRES_DB: local
         ports:
           - 5432:5432
         options: >-
@@ -29,8 +29,12 @@ jobs:
           --health-retries=5
 
     env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
-      E2E_DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_e2e_db
+      DATABASE_URL: postgres://local:local@localhost:5432/local
+      E2E_DATABASE_URL: postgres://local:local@localhost:5432/test_e2e_db
+      POSTGRES_USER: local
+      POSTGRES_PASSWORD: local
+      POSTGRES_DB: local
+      POSTGRES_E2E_DB: test_e2e_db
 
     steps:
       - name: Checkout code
@@ -45,7 +49,9 @@ jobs:
         run: yarn install
 
       - name: Create E2E test database
-        run: psql -h localhost -U postgres -c 'CREATE DATABASE test_e2e_db;'
+        env:
+          PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        run: psql -h localhost -U ${{ env.POSTGRES_USER }} -c 'CREATE DATABASE test_e2e_db;'
 
       - name: Lint codebase
         run: yarn lint
