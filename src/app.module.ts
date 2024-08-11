@@ -6,7 +6,6 @@ import { GamesController } from './games.controller';
 import { GamesService } from './games.service';
 import { GameRepository } from './repositories/game.repository';
 import { TypeOrmExModule } from './typeorm-ex-module/typeorm-ex.module';
-import { GameCell } from './entities';
 import { GameCellRepository } from './repositories/game-cell.repository';
 
 @Module({
@@ -18,6 +17,7 @@ import { GameCellRepository } from './repositories/game-cell.repository';
       username: 'local',
       password: 'local',
       database: 'local',
+      // eslint-disable-next-line no-undef
       entities: [join(__dirname, 'entities/*')],
       synchronize: true,
     }),
