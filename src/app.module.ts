@@ -4,7 +4,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GamesController } from './games.controller';
 import { GamesService } from './games.service';
-import { Game, GameCell } from './entities';
+import { GameRepository } from './repositories/game.repository';
+import { TypeOrmExModule } from './typeorm-ex-module/typeorm-ex.module';
+import { GameCell } from './entities';
+import { GameCellRepository } from './repositories/game-cell.repository';
 
 @Module({
   imports: [
@@ -18,10 +21,9 @@ import { Game, GameCell } from './entities';
       entities: [join(__dirname, 'entities/*')],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Game, GameCell]),
+    TypeOrmExModule.forCustomRepository([GameRepository, GameCellRepository]),
   ],
   controllers: [GamesController],
   providers: [GamesService],
 })
-
 export class AppModule {}
