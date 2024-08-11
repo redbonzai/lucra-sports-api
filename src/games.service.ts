@@ -1,17 +1,17 @@
-import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CellStatus, Game, GameCell, GameStatus } from './entities';
-import { GameResponseDto } from './dto/game-response.dto';
+import { GameRepository } from './repositories/game.repository';
+import { GameCellRepository } from './repositories/game-cell.repository';
 
 @Injectable()
 export class GamesService {
   constructor(
-    @InjectRepository(Game)
-    private gamesRepository: Repository<Game>,
+    @InjectRepository(GameRepository)
+    private gamesRepository: GameRepository,
 
-    @InjectRepository(GameCell)
-    private gameCellsRepository: Repository<GameCell>,
+    @InjectRepository(GameCellRepository)
+    private gameCellsRepository: GameCellRepository,
   ) {}
 
   async createGame(rows: number, columns: number): Promise<Game> {
@@ -104,6 +104,6 @@ export class GamesService {
   }
 
   async getAllGames(): Promise<Game[]> {
-    return await this.gamesRepository.find({ relations: ['cells']});
+    return await this.gamesRepository.find({ relations: ['cells'] });
   }
 }
