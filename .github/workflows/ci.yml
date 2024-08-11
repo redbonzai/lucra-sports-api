@@ -38,10 +38,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4.0.3
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
 
@@ -49,9 +49,8 @@ jobs:
         run: yarn install
 
       - name: Create E2E test database
-        env:
-          PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
-        run: psql -h localhost -U ${{ env.POSTGRES_USER }} -c 'CREATE DATABASE test_e2e_db;'
+        run: |
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -c 'CREATE DATABASE test_e2e_db;'
 
       - name: Lint codebase
         run: yarn lint
