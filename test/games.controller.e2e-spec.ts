@@ -1,42 +1,57 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { describe, it, beforeAll, afterAll, expect } from '@jest/globals';
+import {
+  describe,
+  beforeAll,
+  beforeEach,
+  afterAll,
+  it,
+  expect,
+} from '@jest/globals';
 import { AppModule } from '../src/app.module';
-import { getConnection } from 'typeorm';
+import { TestDataSource } from '../src/data-source/data-source.test';
 
 describe('GamesController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    if (!TestDataSource.isInitialized) {
+      await TestDataSource.initialize();
+    }
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
+  });
 
-    // Optionally clear the database here to ensure a clean state
-    const connection = getConnection();
-    await connection.synchronize(true); // Drops and recreates the database schema
+  beforeEach(async () => {
+    const entities = TestDataSource.entityMetadatas;
+    for (const entity of entities) {
+      const repository = TestDataSource.getRepository(entity.name);
+      await repository.query(`DELETE FROM ${entity.tableName}`);
+    }
   });
 
   afterAll(async () => {
-    await getConnection().close();
+    await TestDataSource.destroy();
     await app.close();
   });
 
   it('/games (POST) should create a new game', async () => {
     const response = await request(app.getHttpServer())
       .post('/games')
-      .send({ rows: 5, columns: 5 })
+      .send({ rows: 2, columns: 2 })
       .expect(201);
 
     expect(response.body).toHaveProperty('id');
     expect(response.body).toHaveProperty('status', 'PENDING');
-    expect(response.body).toHaveProperty('rows', 5);
-    expect(response.body).toHaveProperty('columns', 5);
-    expect(response.body.cells.length).toBe(25); // 5x5 grid
+    expect(response.body).toHaveProperty('rows', 2);
+    expect(response.body).toHaveProperty('columns', 2);
+    expect(response.body.cells.length).toBe(4); // 5x5 grid
   });
 
   it('/games (GET) should retrieve all games', async () => {
@@ -70,7 +85,7 @@ describe('GamesController (e2e)', () => {
   });
 
   it('/games/:id (GET) should return 404 for a non-existent game', async () => {
-    const nonExistentId = 'non-existent-id';
+    const nonExistentId = '4da4c314-c6f5-49b0-aa55-5b811dc7d87a';
 
     await request(app.getHttpServer())
       .get(`/games/${nonExistentId}`)

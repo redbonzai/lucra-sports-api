@@ -10,7 +10,6 @@ const compat = new FlatCompat({
 
 module.exports = [
   js.configs.recommended, // Add base JavaScript rules
-
   {
     files: ['{src,apps,libs,test}/**/*.ts', '{src,apps,libs,test}/**/*.tsx'], // Apply to TypeScript files in the specified directories
     languageOptions: {

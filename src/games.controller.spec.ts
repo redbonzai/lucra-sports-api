@@ -1,45 +1,50 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { describe, beforeEach, it, expect } from '@jest/globals';
-import { GamesController } from './games.controller';
-import { GamesService } from './games.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { describe, beforeEach, afterEach, it, expect } from '@jest/globals';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Game, GameCell } from './entities';
+import { AppModule } from './app.module';
 
-describe('GamesController', () => {
-  let gamesController: GamesController;
-  const mockGamesRepository = {
-    // eslint-disable-next-line no-undef
-    findOneBy: jest.fn(() => null),
-  };
-
-  const mockGameCellsRepository = {
-    // eslint-disable-next-line no-undef
-    findOneBy: jest.fn(() => null),
-  };
+describe('GamesController (e2e)', () => {
+  let app: INestApplication;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [GamesController],
-      providers: [
-        GamesService,
-        {
-          provide: getRepositoryToken(Game),
-          useValue: mockGamesRepository,
-        },
-        {
-          provide: getRepositoryToken(GameCell),
-          useValue: mockGameCellsRepository,
-        },
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [
+        TypeOrmModule.forRoot({
+          type: 'sqlite',
+          database: ':memory:',
+          entities: [Game, GameCell],
+          synchronize: true,
+        }),
+        AppModule,
       ],
     }).compile();
 
-    gamesController = app.get<GamesController>(GamesController);
+    app = moduleFixture.createNestApplication();
+    await app.init();
   });
 
-  describe('/games', () => {
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe('/games (GET)', () => {
     it('should return a list of available games', async () => {
-      const data = gamesController.getAll();
-      expect(data).toBeDefined();
+      // Create a game first
+      await request(app.getHttpServer())
+        .post('/games')
+        .send({ rows: 3, columns: 4 })
+        .expect(201);
+
+      // Then retrieve all games
+      const response = await request(app.getHttpServer())
+        .get('/games')
+        .expect(200);
+
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.length).toBeGreaterThan(0);
     });
   });
 });

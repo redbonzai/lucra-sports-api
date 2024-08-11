@@ -11,5 +11,18 @@ services:
       POSTGRES_USER: local
       POSTGRES_PASSWORD: local
       POSTGRES_DB: local
+  db_test:
+    container_name: lucra-be-take-home_dbtest
+    image: postgres:16.3
+    restart: always
+    volumes:
+      - db_test_data:/var/lib/postgresql/data
+    ports:
+      - "5445:5432"
+    environment:
+      POSTGRES_USER: local
+      POSTGRES_PASSWORD: local
+      POSTGRES_DB: test_e2e_db
 volumes:
   db_data:
+  db_test_data:
