@@ -12,6 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:latest
@@ -31,6 +32,9 @@ jobs:
     env:
       E2E_DATABASE_URL: postgres://local:local@localhost:5445/test_e2e_db
       DATABASE_URL: postgres://local:local@localhost:5432/local
+      POSTGRES_USER: local
+      POSTGRES_PASSWORD: local
+      POSTGRES_DB: local
 
     steps:
       - name: Checkout code
