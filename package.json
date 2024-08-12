@@ -18,7 +18,14 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "typeorm",
+    "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d src/data-source/data-source.ts src/migrations",
+    "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d ./src/data-source/data-source.ts",
+    "migration:revert": "yarn typeorm migration:revert",
+    "migration:create": "yarn typeorm migration:create",
+    "migration:show": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:show -d ./src/data-source/data-source.ts",
+    "migration:drop": "yarn typeorm schema:drop"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -69,8 +76,8 @@
     "supertest": "7.0.0",
     "ts-jest": "29.2.4",
     "ts-loader": "9.5.1",
-    "ts-node": "10.9.2",
-    "tsconfig-paths": "4.2.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "5.5.4"
   },
   "packageManager": "yarn@4.3.1"
