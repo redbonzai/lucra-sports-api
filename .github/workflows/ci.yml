@@ -61,7 +61,7 @@ jobs:
 
       - name: Seed E2E test database
         run: |
-          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -p 5445 -d test_e2e_db -f ./path/to/seed.sql
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -p 5445 -d test_e2e_db -f ./src/seed/seed.sql
 
       - name: Lint codebase
         run: yarn lint
