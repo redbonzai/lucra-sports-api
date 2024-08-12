@@ -8,7 +8,7 @@ export class GameRepository extends Repository<Game> {
     return this.find({ relations: ['cells'] });
   }
 
-  async findOneGameWithCells(id: string): Promise<Game | null> {
+  public async findOneGameWithCells(id: string): Promise<Game | null> {
     return this.findOne({
       where: { id },
       relations: ['cells'],
