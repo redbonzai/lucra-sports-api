@@ -13,32 +13,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: local
-          POSTGRES_PASSWORD: local
-          POSTGRES_DB: local
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    env:
-      DATABASE_URL: postgres://local:local@localhost:5432/local
-      E2E_DATABASE_URL: postgres://local:local@localhost:5432/test_e2e_db
-      POSTGRES_USER: local
-      POSTGRES_PASSWORD: local
-      POSTGRES_DB: local
-      POSTGRES_E2E_DB: test_e2e_db
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: docker-compose -f docker-compose.yml up -d
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -48,9 +28,13 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Create E2E test database
+      - name: Wait for PostgreSQL to be ready
         run: |
-          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -c 'CREATE DATABASE test_e2e_db;'
+          until PGPASSWORD=local psql -h localhost -U local -c '\q'; do
+            echo "PostgreSQL is unavailable - sleeping"
+            sleep 1
+          done
+          echo "PostgreSQL is up - continuing"
 
       - name: Lint codebase
         run: yarn lint
@@ -63,6 +47,10 @@ jobs:
 
       - name: Run E2E tests
         run: yarn test:e2e
+
+      - name: Tear down Docker Compose
+        if: always()
+        run: docker-compose -f docker-compose.yml down
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v3
