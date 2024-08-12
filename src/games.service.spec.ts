@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, beforeEach, it, expect } from '@jest/globals';
-// import jest from 'jest-mock';
 import { GamesService } from './games.service';
 import { GameRepository } from './repositories/game.repository';
 import { GameCellRepository } from './repositories/game-cell.repository';
@@ -9,8 +8,10 @@ import { Repository } from 'typeorm';
 
 describe('GamesService', () => {
   let service: GamesService;
+
   // eslint-disable-next-line no-undef
   let gameRepository: jest.Mocked<Repository<Game>>;
+
   // eslint-disable-next-line no-undef
   let gameCellRepository: jest.Mocked<Repository<GameCell>>;
 
@@ -21,16 +22,22 @@ describe('GamesService', () => {
         {
           provide: GameRepository,
           useValue: {
+            // eslint-disable-next-line no-undef
             create: jest.fn(),
+            // eslint-disable-next-line no-undef
             save: jest.fn(),
+            // eslint-disable-next-line no-undef
             findOne: jest.fn(),
+            // eslint-disable-next-line no-undef
             find: jest.fn(),
           },
         },
         {
           provide: GameCellRepository,
           useValue: {
+            // eslint-disable-next-line no-undef
             create: jest.fn(),
+            // eslint-disable-next-line no-undef
             save: jest.fn(),
           },
         },
