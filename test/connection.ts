@@ -1,4 +1,3 @@
-// test/connection.ts
 import { TestDataSource } from '../src/data-source/data-source.test';
 
 export const initializeTestDatabase = async () => {

@@ -30,6 +30,9 @@ describe('GamesService', () => {
             findOne: jest.fn(),
             // eslint-disable-next-line no-undef
             find: jest.fn(),
+            // eslint-disable-next-line no-undef
+            findOneGameWithCells: jest.fn(),
+
           },
         },
         {
@@ -151,34 +154,39 @@ describe('GamesService', () => {
 
       const mockGame: Game = {
         id: gameId,
-        rows: 5,
-        columns: 5,
+        rows: 2,
+        columns: 2,
+
         status: 'PENDING' as any,
         cells: [],
       };
 
-      gameRepository.findOne.mockResolvedValue(mockGame);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      gameRepository.findOneGameWithCells.mockResolvedValue(mockGame);
 
       const result = await service.findOneGame(gameId);
 
-      expect(gameRepository.findOne).toHaveBeenCalledWith({
-        where: { id: gameId },
-        relations: ['cells'],
-      });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      expect(gameRepository.findOneGameWithCells).toHaveBeenCalledWith(gameId);
+
       expect(result).toEqual(mockGame);
     });
 
     it('should return null if the game is not found', async () => {
       const gameId = 'non-existent-id';
-
-      gameRepository.findOne.mockResolvedValue(null);
+      
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      gameRepository.findOneGameWithCells.mockResolvedValue(null);
 
       const result = await service.findOneGame(gameId);
 
-      expect(gameRepository.findOne).toHaveBeenCalledWith({
-        where: { id: gameId },
-        relations: ['cells'],
-      });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      expect(gameRepository.findOneGameWithCells).toHaveBeenCalledWith(gameId);
+
       expect(result).toBeNull();
     });
   });

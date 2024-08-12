@@ -97,10 +97,7 @@ export class GamesService {
   }
 
   async findOneGame(id: string): Promise<Game | null> {
-    return await this.gamesRepository.findOne({
-      where: { id },
-      relations: ['cells'],
-    });
+    return await this.gamesRepository.findOneGameWithCells(id);
   }
 
   async getAllGames(): Promise<Game[]> {
