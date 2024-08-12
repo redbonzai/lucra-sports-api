@@ -5,6 +5,8 @@ services:
     restart: always
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./src/seeds/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+
     ports:
       - "5432:5432"
     environment:
@@ -17,6 +19,7 @@ services:
     restart: always
     volumes:
       - db_test_data:/var/lib/postgresql/data
+      - ./src/seeds/seed.sql:/docker-entrypoint-initdb.d/seed.sql
     ports:
       - "5445:5432"
     environment:

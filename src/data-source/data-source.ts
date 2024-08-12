@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   entities: [Game, GameCell],
   // eslint-disable-next-line no-undef
   migrations: [join(__dirname + '/../migrations/*{.ts,.js}')],
-  synchronize: false,
+  synchronize: true,
 });
 
 // Call initialize only if necessary, usually within your app's entry point.
