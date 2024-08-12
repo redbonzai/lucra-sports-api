@@ -32,6 +32,7 @@ describe('GamesService', () => {
             find: jest.fn(),
             // eslint-disable-next-line no-undef
             findOneGameWithCells: jest.fn(),
+
           },
         },
         {
@@ -155,6 +156,7 @@ describe('GamesService', () => {
         id: gameId,
         rows: 2,
         columns: 2,
+
         status: 'PENDING' as any,
         cells: [],
       };
@@ -168,11 +170,13 @@ describe('GamesService', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(gameRepository.findOneGameWithCells).toHaveBeenCalledWith(gameId);
+
       expect(result).toEqual(mockGame);
     });
 
     it('should return null if the game is not found', async () => {
       const gameId = 'non-existent-id';
+      
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       gameRepository.findOneGameWithCells.mockResolvedValue(null);
@@ -182,6 +186,7 @@ describe('GamesService', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(gameRepository.findOneGameWithCells).toHaveBeenCalledWith(gameId);
+
       expect(result).toBeNull();
     });
   });
