@@ -24,7 +24,7 @@ jobs:
           - 5432:5432
           - 5445:5432  # Bind the internal port 5432 to external port 5445 for testing
         options: >-
-          --health-cmd="pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -h localhost"
+          --health-cmd="pg_isready -U local -d local -h localhost"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
