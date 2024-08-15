@@ -22,7 +22,7 @@ jobs:
           POSTGRES_DB: local
         ports:
           - 5432:5432
-          - 5445:5445
+          - 5445:5432  # Bind the internal port to an external one for testing
         options: >-
           --health-cmd="pg_isready -d local"
           --health-interval=10s
@@ -36,18 +36,28 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: yarn install
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..30}; do
+            if PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -p 5445 -c '\q'; then
+              echo "Postgres is up and running"
+              break
+            fi
+            echo "Waiting for Postgres to be ready..."
+            sleep 2
+          done
 
       - name: Create E2E test database
         run: |
           PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -p 5445 -c 'CREATE DATABASE test_e2e_db;'
 
       - name: Run migrations on E2E test database
-        run: |
-          yarn migration:run -d src/data-source/data-source.test.ts
+        run: DATABASE_URL=postgres://local:local@localhost:5445/test_e2e_db yarn migration:run
 
       - name: Seed E2E test database
         run: |
