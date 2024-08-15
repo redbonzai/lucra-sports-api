@@ -21,12 +21,20 @@ jobs:
           POSTGRES_PASSWORD: local
           POSTGRES_DB: local
         ports:
-          - 5445:5432
+          - 5432:5432
+          - 5445:5432  # Bind the internal port 5432 to external port 5445 for testing
         options: >-
-          --health-cmd="pg_isready -U local -d local -h localhost"
+          --health-cmd="pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -h localhost"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
+
+    env:
+      POSTGRES_USER: local
+      POSTGRES_PASSWORD: local
+      POSTGRES_DB: local
+      DATABASE_URL: postgres://local:local@localhost:5445/test_e2e_db
+      E2E_DATABASE_URL: postgres://local:local@localhost:5445/test_e2e_db
 
     steps:
       - name: Checkout code
@@ -43,7 +51,7 @@ jobs:
       - name: Wait for PostgreSQL to be ready
         run: |
           for i in {1..30}; do
-            if PGPASSWORD=local psql -h localhost -U local -p 5445 -c '\q'; then
+            if PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -p 5445 -c '\q'; then
               echo "Postgres is up and running"
               break
             fi
@@ -53,10 +61,15 @@ jobs:
 
       - name: Create E2E test database
         run: |
-          PGPASSWORD=local psql -h localhost -U local -p 5445 -c 'CREATE DATABASE test_e2e_db;'
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -p 5445 -c 'CREATE DATABASE test_e2e_db;'
 
       - name: Run migrations on E2E test database
-        run: DATABASE_URL=postgres://local:local@localhost:5445/test_e2e_db yarn migration:run
+        run: |
+          DATABASE_URL=${{ env.E2E_DATABASE_URL }} yarn migration:run
+
+      - name: Seed E2E test database
+        run: |
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -p 5445 -d test_e2e_db -f ./src/seed/seed.sql
 
       - name: Lint codebase
         run: yarn lint
