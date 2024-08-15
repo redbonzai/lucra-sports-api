@@ -58,10 +58,6 @@ jobs:
       - name: Run migrations on E2E test database
         run: DATABASE_URL=postgres://local:local@localhost:5432/test_e2e_db yarn migration:run
 
-      - name: Seed E2E test database
-        run: |
-          PGPASSWORD=local psql -h localhost -U local -p 5432 -d test_e2e_db -f ./src/seed/seed.sql
-
       - name: Lint codebase
         run: yarn lint
 
