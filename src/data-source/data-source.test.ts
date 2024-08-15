@@ -1,4 +1,3 @@
-// data-source.test.ts
 import { DataSource } from 'typeorm';
 import { Game, GameCell } from '../entities';
 
