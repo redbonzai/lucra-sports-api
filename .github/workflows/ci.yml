@@ -22,20 +22,12 @@ jobs:
           POSTGRES_DB: local
         ports:
           - 5432:5432
-          - 5445:5432
+          - 5445:5445
         options: >-
-          --health-cmd="pg_isready"
-          --health-interval=15s
-          --health-timeout=10s
-          --health-retries=10
-
-    env:
-      DATABASE_URL: postgres://local:local@localhost:5432/local
-      E2E_DATABASE_URL: postgres://local:local@localhost:5445/test_e2e_db
-      POSTGRES_USER: local
-      POSTGRES_PASSWORD: local
-      POSTGRES_DB: local
-      POSTGRES_E2E_DB: test_e2e_db
+          --health-cmd="pg_isready -d local"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout code
@@ -49,18 +41,19 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Wait for Postgres to be ready
-        run: sleep 15
+      - name: Upload seed.sql file
+        uses: actions/upload-artifact@v3
+        with:
+          name: seed-file
+          path: ./src/seed/seed.sql
 
       - name: Create E2E test database
         run: |
           PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -p 5445 -c 'CREATE DATABASE test_e2e_db;'
 
       - name: Run migrations on E2E test database
-        run: DATABASE_URL=${{ env.E2E_DATABASE_URL }} yarn migration:run
-
-      - name: List files in src/seed
-        run: ls -l ./src/seed
+        run: |
+          yarn migration:run -d src/data-source/data-source.test.ts
 
       - name: Seed E2E test database
         run: |
@@ -79,7 +72,7 @@ jobs:
         run: yarn test:e2e
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4.3.6
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-report
           path: coverage/
