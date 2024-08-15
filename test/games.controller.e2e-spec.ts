@@ -10,7 +10,7 @@ import {
   expect,
 } from '@jest/globals';
 import { AppModule } from '../src/app.module';
-import { TestDataSource } from '../src/data-source/data-source.test';
+import { TestDataSource } from '../src/data-source';
 
 describe('GamesController (e2e)', () => {
   let app: INestApplication;

@@ -7,7 +7,7 @@ import { GameRepository } from './repositories/game.repository';
 import { TypeOrmExModule } from './typeorm-ex-module/typeorm-ex.module';
 import { GameCellRepository } from './repositories/game-cell.repository';
 import { Game, GameCell } from './entities';
-import { AppDataSource } from './data-source/data-source';
+import { AppDataSource } from './data-source';
 
 @Module({
   imports: [
