@@ -15,6 +15,7 @@ describe('GamesService', () => {
   // eslint-disable-next-line no-undef
   let gameCellRepository: jest.Mocked<GameCellRepository>;
 
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -91,7 +92,6 @@ describe('GamesService', () => {
 
       const result = await service.createGame(rows, columns);
       expect(gameCellRepository.create).toHaveBeenCalledTimes(rows * columns);
-
       expect(result.cells).toHaveLength(rows * columns);
     });
   });
@@ -211,6 +211,7 @@ describe('GamesService', () => {
         status: 'PENDING' as any,
         cells: [],
       };
+
 
       gameRepository.findOneGameWithCells.mockResolvedValue(mockGame);
       const result = await service.findOneGame(gameId);

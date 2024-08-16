@@ -5,7 +5,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "db:start": "docker compose -f docker-compose.yml up --build -d",
     "db:stop": "docker compose -f docker-compose.yml down",
     "db:reset": "docker rm -f lucra-be-take-home_db && docker volume rm lucra-be-take-home_db_data",
@@ -33,7 +33,7 @@
       "json",
       "ts"
     ],
-    "rootDir": ".",
+    "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -41,15 +41,8 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/src/",
-      "<rootDir>/libs/"
-    ],
-    "moduleNameMapper": {
-      "^@app/logger(|/.*)$": "<rootDir>/libs/logger/src/$1"
-    }
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.1.0",
@@ -58,13 +51,8 @@
     "@nestjs/core": "10.3.10",
     "@nestjs/platform-express": "10.3.10",
     "@nestjs/typeorm": "^10.0.2",
-    "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
-    "nestjs-pino": "^4.1.0",
     "pg": "8.12.0",
-    "pino": "^9.3.2",
-    "pino-http": "^10.2.0",
-    "pino-pretty": "^11.2.2",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.1",
     "typeorm": "^0.3.20"
