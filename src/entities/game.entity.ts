@@ -4,6 +4,7 @@ import { GameCell } from './game-cell.entity';
 export enum GameStatus {
   Pending = 'PENDING',
   Cleared = 'CLEARED',
+  Completed = 'Completed',
   Detonated = 'DETONATED',
 }
 

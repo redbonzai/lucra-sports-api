@@ -8,12 +8,14 @@ import { TypeOrmExModule } from './typeorm-ex-module/typeorm-ex.module';
 import { GameCellRepository } from './repositories/game-cell.repository';
 import { Game, GameCell } from './entities';
 import { AppDataSource } from './data-source';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(AppDataSource.options),
     TypeOrmExModule.forCustomRepository([GameRepository, GameCellRepository]),
     TypeOrmModule.forFeature([Game, GameCell]),
+    LoggerModule.forRoot({}),
   ],
   controllers: [GamesController],
   providers: [GamesService],

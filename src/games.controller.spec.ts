@@ -5,7 +5,8 @@ import { GamesService } from './games.service';
 import { NotFoundException } from '@nestjs/common';
 import { CreateGameDto } from './dto/create-game.dto';
 import { FindOneGameParams } from './dto/find-one-game-param.dto';
-import { Game, GameStatus, GameCell } from './entities';
+import { Game, GameStatus, GameCell, CellStatus } from './entities';
+import { UpdateGameDto } from './dto/update-game.dto';
 
 describe('GamesController', () => {
   let gamesController: GamesController;
@@ -24,6 +25,8 @@ describe('GamesController', () => {
             findOneGame: jest.fn(),
             // eslint-disable-next-line no-undef
             createGame: jest.fn(),
+            // eslint-disable-next-line no-undef
+            updateGame: jest.fn(),
           },
         },
       ],
@@ -113,6 +116,68 @@ describe('GamesController', () => {
 
       expect(result).toEqual(mockGame);
       expect(gamesService.createGame).toHaveBeenCalledWith(2, 2);
+    });
+  });
+
+  describe('update', () => {
+    it('Should update a game successfully', async () => {
+      const updateGameDto: UpdateGameDto = {
+        id: 'game-id', // Add the missing id field here
+        status: GameStatus.Completed,
+        cells: [
+          {
+            id: 'cell-id-1',
+            status: CellStatus.Hidden,
+          },
+          {
+            id: 'cell-id-2',
+            status: CellStatus.Hidden,
+          },
+        ],
+      };
+
+      const mockGame: Game = {
+        id: 'game-id',
+        rows: 2,
+        columns: 2,
+        status: GameStatus.Completed,
+        cells: [
+          {
+            id: 'cell-id-1',
+            status: CellStatus.Revealed,
+            game: new Game(),
+            xCoordinate: 0,
+            yCoordinate: 0,
+            isMine: false,
+            neighboringBombCount: 0,
+          },
+          {
+            id: 'cell-id-2',
+            status: CellStatus.Flagged,
+            game: new Game(),
+            xCoordinate: 1,
+            yCoordinate: 1,
+            isMine: false,
+            neighboringBombCount: 0,
+          },
+        ],
+      };
+
+      // eslint-disable-next-line no-undef
+      jest.spyOn(gamesService, 'updateGame').mockResolvedValue(mockGame);
+
+      const result = await gamesController.update(
+        { id: 'game-id' },
+        updateGameDto,
+      );
+
+      expect(result.status).toEqual(GameStatus.Completed);
+      expect(result.cells[0].status).toEqual(CellStatus.Revealed);
+      expect(result.cells[1].status).toEqual(CellStatus.Flagged);
+      expect(gamesService.updateGame).toHaveBeenCalledWith(
+        'game-id',
+        updateGameDto,
+      );
     });
   });
 });

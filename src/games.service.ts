@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Game, GameCell } from './entities';
 import { GameRepository } from './repositories/game.repository';
 import { GameCellRepository } from './repositories/game-cell.repository';
+import { UpdateGameDto } from './dto/update-game.dto';
 
 @Injectable()
 export class GamesService {
@@ -94,6 +95,34 @@ export class GamesService {
       }
     }
     return neighbors;
+  }
+
+  async updateGame(id: string, updateGameDto: UpdateGameDto): Promise<Game> {
+    const game = await this.gamesRepository.findOneGameWithCells(id);
+
+    if (!game) {
+      throw new NotFoundException(`Game not found`);
+    }
+
+    // update game properties
+    Object.assign(game, updateGameDto);
+
+    //update associated game cells
+    if (updateGameDto.cells && updateGameDto.cells.length > 0) {
+      const updatePromises = updateGameDto.cells.map(
+        (updatedCell: GameCell) => {
+          return this.gameCellsRepository
+            .createQueryBuilder()
+            .update(GameCell)
+            .set({ status: updatedCell.status })
+            .where('id = :id', { id: updatedCell.id })
+            .execute();
+        },
+      );
+      await Promise.all(updatePromises);
+    }
+
+    return this.gamesRepository.save(game);
   }
 
   async findOneGame(id: string): Promise<Game | null> {
