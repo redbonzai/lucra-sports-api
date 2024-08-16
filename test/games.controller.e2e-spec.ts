@@ -37,8 +37,8 @@ describe('GamesController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await TestDataSource.destroy();
     await app.close();
+    await TestDataSource.destroy();
   });
 
   it('/games (POST) should create a new game', async () => {

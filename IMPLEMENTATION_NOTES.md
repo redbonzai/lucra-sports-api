@@ -31,5 +31,10 @@ Setup ormconfig.js file that defines the database connection for migrations.
 ## Custom Data Sources
 We have custom data sources for the application, and for testing, respectively.
 
+
+## Custom Central Logging Module
+Centralized logging for the application, that also monitoring systems like Cloudwatch understand.
+
+
 ## Tests
 We have E2E & Unit tests for the games.controller.ts, and unit tests for the games.service.ts

@@ -45,6 +45,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Clear Yarn cache
+        run: yarn cache clean
+
       - name: Install dependencies
         run: yarn install
 

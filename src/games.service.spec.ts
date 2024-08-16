@@ -3,17 +3,17 @@ import { describe, beforeEach, it, expect } from '@jest/globals';
 import { GamesService } from './games.service';
 import { GameRepository } from './repositories/game.repository';
 import { GameCellRepository } from './repositories/game-cell.repository';
-import { Game, GameCell } from './entities';
-import { Repository } from 'typeorm';
+import { CellStatus, Game, GameCell, GameStatus } from './entities';
+import { UpdateGameDto } from './dto/update-game.dto';
 
 describe('GamesService', () => {
   let service: GamesService;
 
   // eslint-disable-next-line no-undef
-  let gameRepository: jest.Mocked<Repository<Game>>;
+  let gameRepository: jest.Mocked<GameRepository>;
 
   // eslint-disable-next-line no-undef
-  let gameCellRepository: jest.Mocked<Repository<GameCell>>;
+  let gameCellRepository: jest.Mocked<GameCellRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,7 +32,6 @@ describe('GamesService', () => {
             find: jest.fn(),
             // eslint-disable-next-line no-undef
             findOneGameWithCells: jest.fn(),
-
           },
         },
         {
@@ -92,59 +91,110 @@ describe('GamesService', () => {
 
       const result = await service.createGame(rows, columns);
       expect(gameCellRepository.create).toHaveBeenCalledTimes(rows * columns);
-
-      // Simplified check for save, omitting the game reference in the expectation
-      // expect(gameCellRepository.save).toHaveBeenCalledWith(
-      //   expect.arrayContaining([
-      //     expect.objectContaining({
-      //       id: 'cell-0-0',
-      //       xCoordinate: 0,
-      //       yCoordinate: 0,
-      //       isMine: false,
-      //       neighboringBombCount: 1,
-      //       game: expect.any(Object), // Ignore the actual content of game
-      //     }),
-      //     expect.objectContaining({
-      //       id: 'cell-0-1',
-      //       xCoordinate: 0,
-      //       yCoordinate: 1,
-      //       isMine: true,
-      //       neighboringBombCount: 0,
-      //       game: expect.any(Object), // Ignore the actual content of game
-      //     }),
-      //     expect.objectContaining({
-      //       id: 'cell-1-0',
-      //       xCoordinate: 1,
-      //       yCoordinate: 0,
-      //       isMine: false,
-      //       neighboringBombCount: 1,
-      //       game: expect.any(Object), // Ignore the actual content of game
-      //     }),
-      //     expect.objectContaining({
-      //       id: 'cell-1-1',
-      //       xCoordinate: 1,
-      //       yCoordinate: 1,
-      //       isMine: false,
-      //       neighboringBombCount: 1,
-      //       game: expect.any(Object), // Ignore the actual content of game
-      //     }),
-      //   ]),
-      // );
-
       expect(result.cells).toHaveLength(rows * columns);
+    });
+  });
 
-      // Optional: Verify that the cells in the result also match the expected structure
-      // result.cells.forEach((cell, index) => {
-      //   const expectedCell = mockCells[index];
-      //   expect(cell).toMatchObject({
-      //     id: expectedCell.id,
-      //     xCoordinate: expectedCell.xCoordinate,
-      //     yCoordinate: expectedCell.yCoordinate,
-      //     isMine: expectedCell.isMine,
-      //     neighboringBombCount: expectedCell.neighboringBombCount,
-      //     status: 'HIDDEN',
-      //   });
-      // });
+  describe('updateGame', () => {
+    it('should update a game and its cells successfully', async () => {
+      const gameId = 'game-id-1';
+      const updateGameDto: UpdateGameDto = {
+        id: gameId,
+        status: GameStatus.Completed,
+        cells: [
+          { id: 'cell-id-1', status: CellStatus.Hidden },
+          { id: 'cell-id-2', status: CellStatus.Hidden },
+        ],
+      };
+
+      const mockGame: Game = {
+        id: gameId,
+        rows: 2,
+        columns: 2,
+        status: GameStatus.Pending,
+        cells: [
+          {
+            id: 'cell-id-1',
+            status: CellStatus.Hidden,
+            game: new Game(),
+            xCoordinate: 0,
+            yCoordinate: 0,
+            isMine: false,
+            neighboringBombCount: 0,
+          },
+          {
+            id: 'cell-id-2',
+            status: CellStatus.Revealed,
+            game: new Game(),
+            xCoordinate: 1,
+            yCoordinate: 1,
+            isMine: false,
+            neighboringBombCount: 0,
+          },
+        ],
+      };
+
+      // eslint-disable-next-line no-undef
+      gameRepository.findOneGameWithCells = jest
+        .fn()
+        .mockResolvedValue(mockGame);
+      // eslint-disable-next-line no-undef
+      gameRepository.save = jest.fn().mockResolvedValue({
+        ...mockGame,
+        status: GameStatus.Completed,
+      });
+
+      // Mock the createQueryBuilder chain for updating cells
+      const mockQueryBuilder = {
+        // eslint-disable-next-line no-undef
+        update: jest.fn().mockReturnThis(),
+        // eslint-disable-next-line no-undef
+        set: jest.fn().mockReturnThis(),
+        // eslint-disable-next-line no-undef
+        where: jest.fn().mockReturnThis(),
+        // eslint-disable-next-line no-undef
+        execute: jest.fn().mockResolvedValue({}),
+      };
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      // eslint-disable-next-line no-undef
+      gameCellRepository.createQueryBuilder = jest.fn(() => mockQueryBuilder);
+
+      const result = await service.updateGame(gameId, updateGameDto);
+
+      expect(result.status).toBe(GameStatus.Completed);
+      expect(gameRepository.findOneGameWithCells).toHaveBeenCalledWith(gameId);
+      expect(gameRepository.save).toHaveBeenCalledWith({
+        ...mockGame,
+        status: GameStatus.Completed,
+      });
+      expect(mockQueryBuilder.update).toHaveBeenCalledTimes(2); // 2 cells being updated
+      expect(mockQueryBuilder.update().set).toHaveBeenCalledWith({
+        status: CellStatus.Hidden,
+      });
+      expect(mockQueryBuilder.execute).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw an error if the game is not found', async () => {
+      const gameId = 'non-existent-id';
+
+      // eslint-disable-next-line no-undef
+      jest
+        .spyOn(gameRepository, 'findOneGameWithCells')
+        .mockResolvedValue(null);
+
+      const updateData = {
+        id: gameId,
+        status: GameStatus.Completed,
+        cells: [],
+      } as UpdateGameDto;
+
+      await expect(service.updateGame(gameId, updateData)).rejects.toThrowError(
+        'Game not found',
+      );
+
+      expect(gameRepository.findOneGameWithCells).toHaveBeenCalledWith(gameId);
     });
   });
 
@@ -161,30 +211,20 @@ describe('GamesService', () => {
         cells: [],
       };
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       gameRepository.findOneGameWithCells.mockResolvedValue(mockGame);
-
       const result = await service.findOneGame(gameId);
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       expect(gameRepository.findOneGameWithCells).toHaveBeenCalledWith(gameId);
-
       expect(result).toEqual(mockGame);
     });
 
     it('should return null if the game is not found', async () => {
       const gameId = 'non-existent-id';
-      
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+
       gameRepository.findOneGameWithCells.mockResolvedValue(null);
 
       const result = await service.findOneGame(gameId);
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       expect(gameRepository.findOneGameWithCells).toHaveBeenCalledWith(gameId);
 
       expect(result).toBeNull();
